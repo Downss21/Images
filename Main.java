@@ -1,21 +1,38 @@
 import images.*;
+import java.util.Scanner;
 
 class Main {
   public static void main(String[] args) {
-    APImage image = new APImage("smokey.jpg");
-		
-		Pixel pixel = new Pixel (0, 0, 0);
-		int x = image.getWidth();
-		int y = image.getHeight();
-		for (int j = 0; j < y; j++)
-	{
-		for (int i = 0; i < x; i++)
-		{
-			Pixel original = image.getPixel(i,j);
-			Pixel negative = new Pixel(original.getRed() + 127, original.getGreen() + 127, original.getBlue() + 127);
-			image.setPixel(i, j, negative);
-		}
-	}
-	image.draw();
+	Scanner reader = new Scanner(System.in);
+    APImage reference = new APImage("smokey.jpg");
+    APImage edge = reference.clone();
+    int height = reference.getHeight() - 1; //cant do the very edge of the image so this makes sure we dont
+    int width = reference.getWidth(); //also calculating it now rather than each loop since it wont change
+    System.out.print("Enter the threshold for edges: ");
+    Double threshold = reader.nextDouble();
+    Pixel WHITE = new Pixel(255, 255 ,255);
+    Pixel BLACK = new Pixel(0, 0, 0);
+    
+    for (int j = 0; j < height; j++)
+    {
+    	for (int i = 1; i < width; i++)
+    	{
+    		Pixel active = reference.getPixel(i, j);
+    		Pixel bottom = reference.getPixel(i, j + 1);
+    		Pixel left = reference.getPixel(i + 1, j);
+    		if (getLuminance(active) - getLuminance(bottom) > threshold || getLuminance(active) - getLuminance(left) > threshold)
+    		{
+    			edge.setPixel(i, j, BLACK);
+    		}
+    		else
+    		{
+    			edge.setPixel(i, j, WHITE);
+    		}
+    	}
+    }
+    edge.draw();
+  }
+  public static double getLuminance(Pixel pixel) {
+	  return (pixel.getRed() + pixel.getGreen() + pixel.getBlue())/3;
   }
 }
